@@ -53,9 +53,7 @@ def main(args):
 
     # model
     pretrained_model = ResNet18Backbone(False)
-    # TODO: Complete the documentation for AttSegmentator model
-    raise NotImplementedError("TODO: Build model AttSegmentator model")
-    model = None
+    model = AttSegmentator(2, pretrained_model.features, att_type='sdotprod', img_size=img_size)
 
     if os.path.isfile(args.pretrained_model_path):
         model = load_from_weights(model, args.pretrained_model_path, logger)
@@ -89,11 +87,9 @@ def main(args):
                                              num_workers=6, pin_memory=True, drop_last=False)
 
 
-    # TODO: loss
-    criterion = None
-    # TODO: SGD optimizer (see pretraining)
-    optimizer = None
-    raise NotImplementedError("TODO: loss function and SGD optimizer")
+    criterion = torch.nn.CrossEntropyLoss().to(device)
+    optimizer = torch.optim.SGD(params_groups, lr=0, momentum=0.9)
+    #raise NotImplementedError("TODO: loss function and SGD optimizer")
 
     log = SummaryWriter(args.logs_folder)
     expdata = "  \n".join(["{} = {}".format(k, v) for k, v in vars(args).items()])
