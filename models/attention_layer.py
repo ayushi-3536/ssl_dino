@@ -50,41 +50,50 @@ class AdditiveAttention(nn.Module):
 class ScaleDotProdAttention(nn.Module):
     def __init__(self, encoder_dim, att_size=512):
         super(ScaleDotProdAttention, self).__init__()
-        raise NotImplementedError("TODO: Implement attention layer")
+        #raise NotImplementedError("TODO: Implement attention layer")
         # Matrices can be seen as linear layers without bias
-        # self.W_Q = 
-        # self.W_K = 
-        # self.W_V = 
+        self.W_Q = nn.Linear(encoder_dim, encoder_dim)
+        self.W_K = nn.Linear(encoder_dim, encoder_dim)
+        self.W_V = nn.Linear(encoder_dim, encoder_dim)
         self.softmax = nn.Softmax(1)
         self.scale_score = 1. / float(att_size)** 0.5
 
     def forward(self, encoder_output, cls_vector):
+        print(encoder_output.shape)
         # encoder_output ------ torch.Size([Bs, hxw, encoder_dim])
         # cls_vector ------ torch.Size([1, 512])
 
-        raise NotImplementedError("TODO: Calculate query, key and vector")
-        # query = 
-        # key = 
-        # value = 
+        #raise NotImplementedError("TODO: Calculate query, key and vector")
+        query = self.W_Q.forward(cls_vector).unsqueeze(2)
+        key = self.W_K.forward(encoder_output)
+        value = self.W_V.forward(encoder_output)
+        print("query shape", query.shape)
+        print("key shape", key.shape)
+        print("value shape", value.shape)
 
         # query ------ torch.Size([1, att_size])
         # key ------ torch.Size([Bs, hxw, att_size])
         # value ------ torch.Size([Bs, hxw, encoder_dim])
         
-        raise NotImplementedError("TODO: Calculate the dot product, \
-            multiply by the scale factor, apply softmax to get the attention")
-        # att = 
-        # att_scaled = 
+        # raise NotImplementedError("TODO: Calculate the dot product, \
+        #     multiply by the scale factor, apply softmax to get the attention")
+
+        att = torch.matmul(key, query).squeeze(-1)
+        print("attention shape",att.shape)
+        att_scaled = att * self.scale_score
+        print("attention shape",att.shape)
         # att (mixed dot product) ------ torch.Size([Bs, hxw])
 
         alpha = self.softmax(att_scaled)
         # alpha ------ torch.Size([24, 49])
         context = (value * alpha.unsqueeze(2))
         # context ------ torch.Size([24, 49, 2048])
+        print("context shape",context.shape)
+        print("alpha shape",alpha.shape)
         return context, alpha
 
 if __name__ == "__main__":
-    model = Attention(512, 'additive').cuda()
+    model = Attention(512, 'sdotprod').cuda()
     model.eval()
     print(model)
     encoder_output = torch.randn(2, 256, 512).cuda()

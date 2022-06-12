@@ -87,8 +87,8 @@ def main(args):
                                              num_workers=6, pin_memory=True, drop_last=False)
 
 
-    criterion = torch.nn.CrossEntropyLoss().to(device)
-    optimizer = torch.optim.SGD(params_groups, lr=0, momentum=0.9)
+    criterion = torch.nn.CrossEntropyLoss().cuda()
+    optimizer = torch.optim.SGD(model.parameters(), lr=0, momentum=0.9)
     #raise NotImplementedError("TODO: loss function and SGD optimizer")
 
     log = SummaryWriter(args.logs_folder)

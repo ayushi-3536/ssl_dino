@@ -21,7 +21,7 @@ class AttSegmentator(nn.Module):
         low_level_dim = 64
         self.num_classes = num_classes
 
-        raise NotImplementedError("TODO: Make sure the number of classes is correct for this network")
+        #raise NotImplementedError("TODO: Make sure the number of classes is correct for this network")
     
         self.class_encoder = nn.Linear(num_classes, 512)
 
@@ -48,9 +48,13 @@ class AttSegmentator(nn.Module):
         # Be aware of the dimentions.
 
         batch_size, encoder_dim, feat_width, feat_height = enc_feat.shape
+        print("encoding feat shape", enc_feat.shape)
         enc_feat = enc_feat.permute(0, 2, 3, 1).reshape(batch_size, feat_height * feat_width, encoder_dim)
 
         enc_feat, attention = self.attention_enc(enc_feat, class_vec)
+
+        print("enc feat",enc_feat.shape)
+        print("attention shape",attention.shape)
 
         enc_feat = enc_feat.permute(0, 2, 1).reshape(batch_size, encoder_dim, feat_width, feat_height)
 
@@ -65,7 +69,7 @@ class AttSegmentator(nn.Module):
 if __name__ == "__main__":
     from torchvision.models.resnet import resnet18
     pretrained_model = resnet18(num_classes=4).cuda()
-    model = AttSegmentator(10, pretrained_model, att_type='dotprod', double_att=True).cuda()
+    model = AttSegmentator(10, pretrained_model, att_type='sdotprod').cuda()
     model.eval()
     print(model)
     image = torch.randn(1, 3, 512, 512).cuda()
