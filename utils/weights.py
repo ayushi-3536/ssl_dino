@@ -7,10 +7,11 @@ _logger_props = {
     "enqueue": True,
     "rotation": "500 MB"
 }
+print(torch.__version__)
 # Load from weights
 def load_from_weights(model, weights, logger=None):
     if logger:
-        logger.info("Loading weights from "+weights)
+        print("Loading weights from "+weights)
     else:
         print("Loading weights from "+weights)
 
@@ -19,37 +20,37 @@ def load_from_weights(model, weights, logger=None):
     if 'model' in ckpt.keys():
         ckpt = ckpt['model']
     if 'teacher' in ckpt.keys():
-        logger.debug("teacher in ckpt")
+        print("teacher in ckpt")
         ckpt = ckpt['teacher']
 
     model_dict = model.state_dict()
-    logger.debug("model_dict",model_dict.keys())
+    print("model_dict",model_dict.keys())
     # Change the names of the keys
     loaded_dict = {k.replace("module.", "").replace("backbone.", "").replace("features.", ""): v for k, v in ckpt.items()}
-    logger.debug(loaded_dict.keys())
+    print(loaded_dict.keys())
     # Look in the models dicts the keys that match
     pretrained_dict = {}
     weights_ignored = []
     weights_loaded = []
     for k, v in model_dict.items():
         k_loaded = k.replace("module.", "").replace("backbone.", "").replace("features.", "")
-        logger.debug("k_loaded",k_loaded)
+        print("k_loaded",k_loaded)
         if k_loaded in loaded_dict.keys():
-            logger.debug("k_loaded",k_loaded)
-            logger.debug("model k",k)
+            print("k_loaded",k_loaded)
+            print("model k",k)
             match_size = (v.shape==loaded_dict[k_loaded].shape)
             if match_size:
                 pretrained_dict[k] = loaded_dict[k_loaded]
-                logger.debug("weight loaded",k_loaded)
+                print("weight loaded",k_loaded)
                 weights_loaded.append(k_loaded)
             else:
-                logger.debug("weight ignored", k_loaded)
+                print("weight ignored", k_loaded)
                 weights_ignored.append(k)
 
     expdata = "  ".join(["{}".format(k) for k in weights_ignored])
     if logger:
-        logger.info('Weights not found in loaded model: '+expdata)
-        logger.info('----------------------------------')
+        print('Weights not found in loaded model: '+expdata)
+        print('----------------------------------')
     else:
         print('Weights not found in loaded model: '+expdata)
         print('----------------------------------')
@@ -60,8 +61,8 @@ def load_from_weights(model, weights, logger=None):
             weights_not_used.append(k)
     expdata = "  ".join(["{}".format(k) for k in weights_not_used])
     if logger:
-        logger.info('Weights not used from loaded model: '+expdata)
-        logger.info('----------------------------------')
+        print('Weights not used from loaded model: '+expdata)
+        print('----------------------------------')
     else:
         print('Weights not used from loaded model: '+expdata)
         print('----------------------------------')
@@ -69,7 +70,7 @@ def load_from_weights(model, weights, logger=None):
     model_dict.update(pretrained_dict)
     model.load_state_dict(model_dict)
     if logger:
-        logger.info("Done loading pretrained weights")
+        print("Done loading pretrained weights")
     else:
         print("Done loading pretrained weights")
 

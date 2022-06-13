@@ -23,11 +23,11 @@ class AttSegmentator(nn.Module):
 
         #raise NotImplementedError("TODO: Make sure the number of classes is correct for this network")
     
-        self.class_encoder = nn.Linear(num_classes, 512)
+        self.class_encoder = nn.Linear(5, 512)
 
         self.attention_enc = Attention(encoder_dim, att_type)
 
-        self.decoder = Decoder(2, encoder_dim, img_size, low_level_dim=low_level_dim, rates=[1, 6, 12, 18])
+        self.decoder = Decoder(self.num_classes, encoder_dim, img_size, low_level_dim=low_level_dim, rates=[1, 6, 12, 18])
 
     def forward(self, x, v_class, out_att=False):
         self.low_feat.eval()
@@ -53,8 +53,8 @@ class AttSegmentator(nn.Module):
 
         enc_feat, attention = self.attention_enc(enc_feat, class_vec)
 
-        print("enc feat",enc_feat.shape)
-        print("attention shape",attention.shape)
+        print("enc feat", enc_feat.shape)
+        print("attention shape", attention.shape)
 
         enc_feat = enc_feat.permute(0, 2, 1).reshape(batch_size, encoder_dim, feat_width, feat_height)
 

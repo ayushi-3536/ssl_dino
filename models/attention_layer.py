@@ -52,8 +52,8 @@ class ScaleDotProdAttention(nn.Module):
         super(ScaleDotProdAttention, self).__init__()
         #raise NotImplementedError("TODO: Implement attention layer")
         # Matrices can be seen as linear layers without bias
-        self.W_Q = nn.Linear(encoder_dim, encoder_dim)
-        self.W_K = nn.Linear(encoder_dim, encoder_dim)
+        self.W_Q = nn.Linear(512, att_size)
+        self.W_K = nn.Linear(encoder_dim, att_size)
         self.W_V = nn.Linear(encoder_dim, encoder_dim)
         self.softmax = nn.Softmax(1)
         self.scale_score = 1. / float(att_size)** 0.5
@@ -64,7 +64,7 @@ class ScaleDotProdAttention(nn.Module):
         # cls_vector ------ torch.Size([1, 512])
 
         #raise NotImplementedError("TODO: Calculate query, key and vector")
-        query = self.W_Q.forward(cls_vector).unsqueeze(2)
+        query = self.W_Q.forward(cls_vector).unsqueeze(1)
         key = self.W_K.forward(encoder_output)
         value = self.W_V.forward(encoder_output)
         print("query shape", query.shape)
@@ -78,7 +78,7 @@ class ScaleDotProdAttention(nn.Module):
         # raise NotImplementedError("TODO: Calculate the dot product, \
         #     multiply by the scale factor, apply softmax to get the attention")
 
-        att = torch.matmul(key, query).squeeze(-1)
+        att = torch.bmm(query, key.permute(0, 2, 1)).squeeze(1)
         print("attention shape",att.shape)
         att_scaled = att * self.scale_score
         print("attention shape",att.shape)
