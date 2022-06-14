@@ -78,18 +78,21 @@ class ScaleDotProdAttention(nn.Module):
         # raise NotImplementedError("TODO: Calculate the dot product, \
         #     multiply by the scale factor, apply softmax to get the attention")
 
-        att = torch.bmm(query, key.permute(0, 2, 1)).squeeze(1)
+        att = torch.matmul(query, key.permute(0, 2, 1)).squeeze(1)
         print("attention shape",att.shape)
         att_scaled = att * self.scale_score
         print("attention shape",att.shape)
+        
         # att (mixed dot product) ------ torch.Size([Bs, hxw])
 
         alpha = self.softmax(att_scaled)
         # alpha ------ torch.Size([24, 49])
         context = (value * alpha.unsqueeze(2))
         # context ------ torch.Size([24, 49, 2048])
+        alpha = [a.reshape(1,8,8) for a in alpha]
+        
         print("context shape",context.shape)
-        print("alpha shape",alpha.shape)
+        #print("alpha shape",alpha.shape)
         return context, alpha
 
 if __name__ == "__main__":

@@ -54,7 +54,7 @@ class AttSegmentator(nn.Module):
         enc_feat, attention = self.attention_enc(enc_feat, class_vec)
 
         print("enc feat", enc_feat.shape)
-        print("attention shape", attention.shape)
+        #print("attention shape", attention.shape)
 
         enc_feat = enc_feat.permute(0, 2, 1).reshape(batch_size, encoder_dim, feat_width, feat_height)
 

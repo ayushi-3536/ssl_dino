@@ -53,10 +53,12 @@ def main(args):
 
     # model
     pretrained_model = ResNet18Backbone(False)
-    model = AttSegmentator(2, pretrained_model.features, att_type='sdotprod', img_size=img_size)
+    model = AttSegmentator(2, pretrained_model.features, att_type='sdotprod', img_size=img_size).cuda()
 
     if os.path.isfile(args.pretrained_model_path):
         model = load_from_weights(model, args.pretrained_model_path, logger)
+    
+    #model = AttSegmentator(2, pretrained_model.features, att_type='sdotprod', img_size=img_size).cuda()
 
     # dataset
     data_root = args.data_folder
@@ -100,7 +102,7 @@ def main(args):
 
     best_val_loss = np.inf
     best_val_miou = 0.0
-    for epoch in range(100):
+    for epoch in range(40):
         logger.info("Epoch {}".format(epoch))
         train(train_loader, model, criterion, optimizer, log, logger)
         val_results = validate(val_loader, model, criterion, log, logger, epoch)
@@ -132,6 +134,7 @@ def train(loader, model, criterion, optimizer, log, logger):
     for idx, (img, v_class, label) in enumerate(loader):
         img = img.cuda()
         v_class = v_class.float().cuda().squeeze()
+        print("v_class",v_class)
         logits, alphas = model(img, v_class, out_att=True)
         logits = logits.squeeze()
         labels = (torch.nn.functional.interpolate(label.cuda(), size=logits.shape[-2:]).squeeze(1)*256).long()
@@ -215,8 +218,13 @@ def save_in_log(log, save_step, set="", scalar_dict=None, text_dict=None, image_
             elif k=='pred':
                 log.add_images(set+"_"+k, v.argmax(dim=1, keepdim=True), save_step)
             elif k=='att':
+                #v = v.tolist()
                 assert isinstance(v, list)
                 for idx, alpha in enumerate(v):
+                    #print(type(alpha))
+                    #print("alpha shape",alpha.shape)
+                    #alpha = torch.reshape(alpha,(1,8,8))
+                    
                     log.add_images(set+"_"+k+"_"+str(idx), (alpha.unsqueeze(1)-alpha.min())/alpha.max(), save_step)
             else:
                 log.add_images(set+"_"+k, v, save_step)
